@@ -3,7 +3,7 @@
 set -eEuo pipefail
 
 export INIT_DIR=$(pwd)
-WORKING_DIR="/home/ubuntu/AOSP/LineageOS111"
+WORKING_DIR="/home/ubuntu/AOSP/LineageOS"
 export SRC_DIR="$WORKING_DIR/lineage"
 export ZIP_DIR="$WORKING_DIR/zips"
 export LMANIFEST_DIR="$WORKING_DIR/local_manifests"
