@@ -58,7 +58,6 @@ curl https://storage.googleapis.com/git-repo-downloads/repo > /usr/local/bin/rep
 git config --global user.email "you@example.com"
 git config --global user.name "Your Name"
 git config --global trailer.changeid.key "Change-Id"
-git lfs install
 
 $INIT_DIR/checkout-and-patch.sh
 
