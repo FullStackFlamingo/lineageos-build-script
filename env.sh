@@ -1,5 +1,7 @@
 #!/bin/bash
- 
+
+set -eEuo pipefail
+
 export INIT_DIR=$(pwd)
 WORKING_DIR="/home/ubuntu/AOSP/LineageOS111"
 export SRC_DIR="$WORKING_DIR/lineage"

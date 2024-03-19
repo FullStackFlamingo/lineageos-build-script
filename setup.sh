@@ -1,9 +1,6 @@
 #!/bin/bash
- 
-sh $INIT_DIR/env.sh
 
-ccache -M 50G
-ccache -o compression=true
+set -eEuo pipefail
 
 # https://wiki.lineageos.org/devices/sunfish/build/#install-the-build-packages
 apt-get -qq update && \
@@ -42,10 +39,16 @@ apt-get -qq update && \
     libncurses5 \
     libncurses5-dev \
 
+     
+source ./env.sh
+
+ccache -M 50G
+ccache -o compression=true
+
 # https://wiki.lineageos.org/devices/sunfish/build/#create-the-directories
 mkdir -p $SRC_DIR $CCACHE_DIR $ZIP_DIR $LMANIFEST_DIR $KEYS_DIR $LOGS_DIR
 
-sh $INIT_DIR/setup-keys.sh
+$INIT_DIR/setup-keys.sh
 
 # https://wiki.lineageos.org/devices/sunfish/build/#install-the-repo-command
 curl https://storage.googleapis.com/git-repo-downloads/repo > /usr/local/bin/repo && \
@@ -57,6 +60,6 @@ git config --global user.name "Your Name"
 git config --global trailer.changeid.key "Change-Id"
 git lfs install
 
-sh $INIT_DIR/checkout-and-patch.sh
+$INIT_DIR/checkout-and-patch.sh
 
-sh $INIT_DIR/build-and-sign.sh
+$INIT_DIR/build-and-sign.sh

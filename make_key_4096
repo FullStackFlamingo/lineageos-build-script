@@ -48,9 +48,9 @@ mknod "${one}" p
 mknod "${two}" p
 chmod 0600 "${one}" "${two}"
 
-read -rp "Enter password for '$1' (blank for none; password will be visible): " \
-  password
-
+# read -rp "Enter password for '$1' (blank for none; password will be visible): " \
+#   password
+password=""
 if [[ "$#" -eq 2 || "${3}" = "rsa" ]]; then
   ( openssl genrsa -f4 4096 | tee "${one}" > "${two}" ) &
   hash="-sha256"

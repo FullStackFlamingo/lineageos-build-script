@@ -1,8 +1,11 @@
 #!/bin/bash
- 
+
+set -eEuo pipefail
+
 # https://wiki.lineageos.org/devices/sunfish/build/#initialize-the-lineageos-source-repository
 cd "$SRC_DIR"
 # Remove previous changes of vendor/cm, vendor/lineage and frameworks/base (if they exist)
+echo ">> [$(date)]  Remove previous changes of vendor/cm, vendor/lineage and frameworks/base (if they exist)" | tee -a "$REPO_LOG"
 for path in "vendor/cm" "vendor/lineage" "frameworks/base" "packages/apps/PermissionController" "packages/modules/Permission"; do
     if [ -d "$path" ]; then
     cd "$path"
@@ -55,23 +58,23 @@ mkdir -p "vendor/$vendor/overlay/OVERRIDES/"
 sed -i "1s;^;PRODUCT_PACKAGE_OVERLAYS := vendor/$vendor/overlay/OVERRIDES\n;" "vendor/$vendor/config/common.mk"
 # Override device-specific settings for the location providers
 mkdir -p "vendor/$vendor/overlay/OVERRIDES/frameworks/base/core/res/res/values/"
-cp "$INIT_DIR/patches/frameworks_base_config.xml" "vendor/$vendor/overlay/OVERRIDES/frameworks/base/core/res/res/values/config.xml"
+cp $INIT_DIR/patches/frameworks_base_config.xml "vendor/$vendor/overlay/OVERRIDES/frameworks/base/core/res/res/values/config.xml"
 
 # PATCH
 cd frameworks/base
 # frameworks_base_patch="android_frameworks_base-Android14.patch"
 # echo ">> [$(date)] Applying the restricted signature spoofing patch (based on $frameworks_base_patch) to frameworks/base"
 # Ensure patch has android:protectionLevel="signature|privileged" (Not "dangerous") https://developer.android.com/guide/topics/manifest/permission-element#plevel
-# patch --quiet --force -p1 -i "$INIT_DIR/patches/$frameworks_base_patch"
+# patch --quiet --force -p1 -i $INIT_DIR/patches/$frameworks_base_patch
 echo ">> [$(date)] Enabling LineageOS microg spoofing for *user* build"
 # https://review.lineageos.org/c/LineageOS/android_frameworks_base/+/383574
 # https://github.com/LineageOS/android_frameworks_base/compare/lineage-21.0...FullStackFlamingo:android_frameworks_base:patch-1
-patch --quiet --force -p1 -i "$INIT_DIR/patches/android_frameworks_base-lineage-21-allow-microg-on-user-build"
+patch --quiet --force -p1 -i $INIT_DIR/patches/android_frameworks_base-lineage-21-allow-microg-on-user-build
 git clean -q -f
 
 # PATCH AVB
 cd "$SRC_DIR/android/lineageos/build/core"
-patch --quiet --force -p1 -i "$INIT_DIR/patches/core_Makefile-21.0"
+patch --quiet --force -p1 -i $INIT_DIR/patches/core_Makefile-21.0
 cd "$SRC_DIR/android/lineageos/device/google/sunfish"
 sed -i "$ BOARD_AVB_ALGORITHM := SHA256_RSA4096" BoardConfigLineage.mk
 sed -i "$ BOARD_AVB_KEY_PATH := $KEYS_DIR/releasekey.pem" BoardConfigLineage.mk
