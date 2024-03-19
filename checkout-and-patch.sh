@@ -73,14 +73,26 @@ patch --quiet --force -p1 -i $INIT_DIR/patches/android_frameworks_base-lineage-2
 git clean -q -f
 
 # PATCH AVB
+# https://xdaforums.com/t/guide-re-locking-the-bootloader-on-the-google-pixel-6-with-a-self-signed-build-of-los-20-0.4555419/
+# https://android.googlesource.com/platform/external/avb/+/master/README.md#build-system-integration
 cd "$SRC_DIR/android/lineageos/build/core"
 patch --quiet --force -p1 -i $INIT_DIR/patches/core_Makefile-21.0
+
 cd "$SRC_DIR/android/lineageos/device/google/sunfish"
+# https://github.com/LineageOS/android_device_google_sunfish/blob/lineage-21/BoardConfigLineage.mk
 sed -i "$ BOARD_AVB_ALGORITHM := SHA256_RSA4096" BoardConfigLineage.mk
 sed -i "$ BOARD_AVB_KEY_PATH := $KEYS_DIR/releasekey.pem" BoardConfigLineage.mk
+sed -i 's/^BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3/#BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3/' BoardConfigLineage.mk
+# https://github.com/LineageOS/android_device_google_sunfish/blob/lineage-21/BoardConfig-common.mk
+sed -i "s/external\/avb\/test\/data\/testkey_rsa2048.pem/$KEYS_DIR\/releasekey.pem" BoardConfig-common.mk
+sed -i 's/SHA256_RSA2048/SHA256_RSA4096/' BoardConfig-common.mk
 
 cd "$SRC_DIR/android/lineageos/device/google/gs101"
+# https://github.com/LineageOS/android_device_google_gs101/blob/lineage-21/BoardConfigLineage.mk
+# sed -i "$ BOARD_AVB_ALGORITHM := SHA256_RSA4096" BoardConfigLineage.mk
+# sed -i "$ BOARD_AVB_KEY_PATH := $KEYS_DIR/releasekey.pem" BoardConfigLineage.mk
 sed -i 's/^BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3/#BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3/' BoardConfigLineage.mk
+# https://github.com/LineageOS/android_device_google_gs101/blob/lineage-21/BoardConfig-common.mk
 sed -i "s/external\/avb\/test\/data\/testkey_rsa2048.pem/$KEYS_DIR\/releasekey.pem" BoardConfig-common.mk
 sed -i 's/SHA256_RSA2048/SHA256_RSA4096/' BoardConfig-common.mk
 
