@@ -1,0 +1,26 @@
+From 172a2d91f0a1a4cab06861ae31b50006aa6cc419 Mon Sep 17 00:00:00 2001
+From: FullStackFlamingo <15013109+FullStackFlamingo@users.noreply.github.com>
+Date: Tue, 19 Mar 2024 15:07:17 +0000
+Subject: [PATCH] fix: allow microg on `user` build
+
+---
+ .../core/java/com/android/server/pm/ComputerEngine.java     | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/services/core/java/com/android/server/pm/ComputerEngine.java b/services/core/java/com/android/server/pm/ComputerEngine.java
+index 216c7a7fda3a5..a60039e50ae20 100644
+--- a/services/core/java/com/android/server/pm/ComputerEngine.java
++++ b/services/core/java/com/android/server/pm/ComputerEngine.java
+@@ -1459,9 +1459,9 @@ private List<ResolveInfo> maybeAddInstantAppInstaller(List<ResolveInfo> result,
+     private static native boolean isDebuggable();
+ 
+     public static boolean isMicrogSigned(AndroidPackage p) {
+-        if (!isDebuggable()) {
+-            return false;
+-        }
++        // if (!isDebuggable()) {
++            // return false;
++        // }
+ 
+         // Allowlist the following apps:
+         // * com.android.vending - microG Companion
