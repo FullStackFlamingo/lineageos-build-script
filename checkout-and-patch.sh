@@ -1,5 +1,5 @@
 #!/bin/bash
-
+ 
 # https://wiki.lineageos.org/devices/sunfish/build/#initialize-the-lineageos-source-repository
 cd "$SRC_DIR"
 # Remove previous changes of vendor/cm, vendor/lineage and frameworks/base (if they exist)

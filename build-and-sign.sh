@@ -1,5 +1,5 @@
 #!/bin/bash
-
+ 
 
 # https://wiki.lineageos.org/signing_builds#generating-and-signing-target-files
 # https://wiki.lineageos.org/devices/sunfish/build/#start-the-build

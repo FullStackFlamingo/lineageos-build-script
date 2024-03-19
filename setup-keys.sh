@@ -1,5 +1,5 @@
 #!/bin/bash
-
+ 
 KEYS_SUBJECT="/C=US/ST=Someplace/L=Mountain View/O=Android/OU=Android/CN=Android/emailAddress=android@android.com"
 
 if [ -z "$(ls -A "$KEYS_DIR")" ]; then
