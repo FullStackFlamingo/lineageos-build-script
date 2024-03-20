@@ -6,7 +6,15 @@ set -eEuo pipefail
 cd "$SRC_DIR"
 # Remove previous changes (if they exist)
 echo ">> [$(date)] Remove previous changes (if they exist)" | tee -a "$REPO_LOG"
-repo forall -v -c 'git reset -q --hard ; git clean -q -fd' &>> "$REPO_LOG"
+for path in "vendor/lineage" "frameworks/base" "build/core" "device/google/sunfish" "device/google/gs101"; do
+    if [ -d "$path" ]; then
+    cd "$path"
+    git reset -q --hard
+    git clean -q -fd
+    cd $SRC_DIR
+    fi
+done
+
 
 echo ">> [$(date)] (Re)initializing branch repository" | tee -a "$REPO_LOG"
 repo init -u https://github.com/LineageOS/android.git -b "$BRANCH_NAME" --git-lfs --depth=1 &>> "$REPO_LOG"
@@ -19,8 +27,9 @@ mkdir -p .repo/local_manifests
 rsync -a --delete --include '*.xml' --exclude '*' "$LMANIFEST_DIR/" .repo/local_manifests/
 
 # ALTERNATIVE TO  https://wiki.lineageos.org/devices/sunfish/build/#extract-proprietary-blobs
-rm -f .repo/local_manifests/proprietary.xml
-wget -q -O .repo/local_manifests/proprietary.xml "https://raw.githubusercontent.com/TheMuppets/manifests/$THEMUPPETS_BRANCH_NAME/muppets.xml"
+# add muppets.xml manifest to $LMANIFEST_DIR
+# rm -f .repo/local_manifests/proprietary.xml
+# wget -q -O .repo/local_manifests/proprietary.xml "https://raw.githubusercontent.com/TheMuppets/manifests/$THEMUPPETS_BRANCH_NAME/muppets.xml"
 
 # https://wiki.lineageos.org/devices/sunfish/build/#download-the-source-code
 echo ">> [$(date)] Syncing branch repository" | tee -a "$REPO_LOG"
@@ -46,6 +55,7 @@ sed -i "/\$(filter .*\$(${vendor^^}_BUILDTYPE)/,/endif/d" "$makefile_containing_
 
 # Apply the microG's signature spoofing patch (modified to try native LineageOS implementation)
 ## Set up our overlay
+echo ">> [$(date)] Set up our overlay"
 mkdir -p "vendor/$vendor/overlay/OVERRIDES/"
 sed -i "1s;^;PRODUCT_PACKAGE_OVERLAYS := vendor/$vendor/overlay/OVERRIDES\n;" "vendor/$vendor/config/common.mk"
 # Override device-specific settings for the location providers
@@ -58,17 +68,17 @@ cd $SRC_DIR/frameworks/base
 # echo ">> [$(date)] Applying the restricted signature spoofing patch (based on $frameworks_base_patch) to frameworks/base"
 # Ensure patch has android:protectionLevel="signature|privileged" (Not "dangerous") https://developer.android.com/guide/topics/manifest/permission-element#plevel
 # patch --quiet --force -p1 -i $INIT_DIR/patches/$frameworks_base_patch
-echo ">> [$(date)] Enabling LineageOS microg spoofing for *user* build"
+echo ">> [$(date)] Enabling LineageOS's built-in microg spoofing for *user* build"
 # https://review.lineageos.org/c/LineageOS/android_frameworks_base/+/383574
 # https://github.com/LineageOS/android_frameworks_base/compare/lineage-21.0...FullStackFlamingo:android_frameworks_base:patch-1
-patch --quiet --force -p1 -i $INIT_DIR/patches/android_frameworks_base-lineage-21-allow-microg-on-user-build
+patch --quiet --force -p1 -i $INIT_DIR/patches/android_frameworks_base-lineage-21-allow-microg-on-user-build.patch
 git clean -q -f
 
 # PATCH AVB
 # https://xdaforums.com/t/guide-re-locking-the-bootloader-on-the-google-pixel-6-with-a-self-signed-build-of-los-20-0.4555419/
 # https://android.googlesource.com/platform/external/avb/+/master/README.md#build-system-integration
 cd $SRC_DIR/build/core
-patch --quiet --force -p1 -i $INIT_DIR/patches/core_Makefile-21.0
+patch --quiet --force -p1 -i $INIT_DIR/patches/core_Makefile-21.0.patch
 
 cd $SRC_DIR/device/google/sunfish
 # https://github.com/LineageOS/android_device_google_sunfish/blob/lineage-21/BoardConfigLineage.mk
