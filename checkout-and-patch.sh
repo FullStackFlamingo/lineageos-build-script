@@ -74,10 +74,30 @@ echo ">> [$(date)] Enabling LineageOS's built-in microg spoofing for *user* buil
 patch --quiet --force -p1 -i $INIT_DIR/patches/android_frameworks_base-lineage-21-allow-microg-on-user-build.patch
 git clean -q -f
 
+cd "$SRC_DIR"
+
+echo ">> [$(date)] Adding keys path ($KEYS_DIR)"
+# symlink as Soong (Android 9+) complains if the signing keys are outside the build path
+ln -sf "$KEYS_DIR" user-keys
+sed -i "1s;^;PRODUCT_DEFAULT_DEV_CERTIFICATE := user-keys/releasekey\nPRODUCT_OTA_PUBLIC_KEYS := user-keys/releasekey\n\n;" "vendor/$vendor/config/common.mk"
+
+
+# https://wiki.lineageos.org/devices/sunfish/build/#prepare-the-device-specific-code
+echo ">> [$(date)] breakfast preparing build environment"
+source build/envsetup.sh > /dev/null
+breakfast "$DEVICE" "$BUILD_TYPE" &>> "$DEBUG_LOG"
+breakfast_returncode=$?
+if [ $breakfast_returncode -ne 0 ]; then
+    echo ">> [$(date)] breakfast failed for $DEVICE, $BRANCH_NAME branch" | tee -a "$DEBUG_LOG"
+    continue
+fi
+
+
 # PATCH AVB
 # https://xdaforums.com/t/guide-re-locking-the-bootloader-on-the-google-pixel-6-with-a-self-signed-build-of-los-20-0.4555419/
 # https://android.googlesource.com/platform/external/avb/+/master/README.md#build-system-integration
-cd $SRC_DIR/build/core
+echo ">> [$(date)] patch core_Makefile"
+cd $SRC_DIR/build/make
 patch --quiet --force -p1 -i $INIT_DIR/patches/core_Makefile-21.0.patch
 
 cd $SRC_DIR/device/google/sunfish
@@ -98,21 +118,4 @@ sed -i 's/^BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3/#BOARD_AVB_MAKE_VBMETA_
 sed -i "s/external\/avb\/test\/data\/testkey_rsa2048.pem/$KEYS_DIR\/releasekey.pem" BoardConfig-common.mk
 sed -i 's/SHA256_RSA2048/SHA256_RSA4096/' BoardConfig-common.mk
 
-
 cd "$SRC_DIR"
-
-echo ">> [$(date)] Adding keys path ($KEYS_DIR)"
-# symlink as Soong (Android 9+) complains if the signing keys are outside the build path
-ln -sf "$KEYS_DIR" user-keys
-sed -i "1s;^;PRODUCT_DEFAULT_DEV_CERTIFICATE := user-keys/releasekey\nPRODUCT_OTA_PUBLIC_KEYS := user-keys/releasekey\n\n;" "vendor/$vendor/config/common.mk"
-
-
-# https://wiki.lineageos.org/devices/sunfish/build/#prepare-the-device-specific-code
-echo ">> [$(date)] Preparing build environment"
-source build/envsetup.sh > /dev/null
-breakfast "$DEVICE" "$BUILD_TYPE" &>> "$DEBUG_LOG"
-breakfast_returncode=$?
-if [ $breakfast_returncode -ne 0 ]; then
-    echo ">> [$(date)] breakfast failed for $DEVICE, $BRANCH_NAME branch" | tee -a "$DEBUG_LOG"
-    continue
-fi
