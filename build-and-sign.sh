@@ -1,12 +1,13 @@
 #!/bin/bash
  
+set -eEuo pipefail
+
+cd "$SRC_DIR"
 
 # https://wiki.lineageos.org/signing_builds#generating-and-signing-target-files
 # https://wiki.lineageos.org/devices/sunfish/build/#start-the-build
 echo ">> [$(date)] Starting build target-files-package otatools" | tee -a "$DEBUG_LOG"
-set +eu
 mka target-files-package otatools &>> "$DEBUG_LOG"
-set -eu
 
 
 #   $OUT set by Lineage build?
@@ -113,13 +114,22 @@ sign_target_files_apks -o -d $KEYS_DIR \
     $OUT/obj/PACKAGING/target_files_intermediates/*-target_files-*.zip \
     signed-target_files.zip
 
+# figure out Lineage version to name output file
+makefile_containing_version="vendor/$vendor/config/common.mk"
+if [ -f "vendor/$vendor/config/version.mk" ]; then
+    makefile_containing_version="vendor/$vendor/config/version.mk"
+fi
+los_ver_major=$(sed -n -e 's/^\s*PRODUCT_VERSION_MAJOR = //p' "$makefile_containing_version")
+los_ver_minor=$(sed -n -e 's/^\s*PRODUCT_VERSION_MINOR = //p' "$makefile_containing_version")
+los_ver="$los_ver_major.$los_ver_minor"
+
 # https://wiki.lineageos.org/signing_builds#generating-the-install-package
 ota_from_target_files -k $KEYS_DIR/releasekey \
 --block --backup=true \
 signed-target_files.zip \
-signed-ota_update.zip
+signed-ota_update-lineage-$los_ver.zip
 
 
 
-"$SRC_DIR/android/lineageos/external/avb/avbtool" extract_public_key --key "$KEYS_DIR/releasekey.pem --output "$KEYS_DIR/avb_pkmd.bin
+"$SRC_DIR/external/avb/avbtool" extract_public_key --key "$KEYS_DIR/releasekey.pem --output "$KEYS_DIR/avb_pkmd.bin
 

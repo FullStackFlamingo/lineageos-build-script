@@ -40,15 +40,6 @@ if [ ! -d "vendor/$vendor" ]; then
 fi
 
 
-# figure out Lineage version to name output file
-makefile_containing_version="vendor/$vendor/config/common.mk"
-if [ -f "vendor/$vendor/config/version.mk" ]; then
-    makefile_containing_version="vendor/$vendor/config/version.mk"
-fi
-los_ver_major=$(sed -n -e 's/^\s*PRODUCT_VERSION_MAJOR = //p' "$makefile_containing_version")
-los_ver_minor=$(sed -n -e 's/^\s*PRODUCT_VERSION_MINOR = //p' "$makefile_containing_version")
-los_ver="$los_ver_major.$los_ver_minor"
-
 echo ">> [$(date)] Setting \"$RELEASE_TYPE\" as release type"
 sed -i "/\$(filter .*\$(${vendor^^}_BUILDTYPE)/,/endif/d" "$makefile_containing_version"
 
@@ -61,7 +52,7 @@ mkdir -p "vendor/$vendor/overlay/OVERRIDES/frameworks/base/core/res/res/values/"
 cp $INIT_DIR/patches/frameworks_base_config.xml "vendor/$vendor/overlay/OVERRIDES/frameworks/base/core/res/res/values/config.xml"
 
 # PATCH
-cd frameworks/base
+cd $SRC_DIR/frameworks/base
 # frameworks_base_patch="android_frameworks_base-Android14.patch"
 # echo ">> [$(date)] Applying the restricted signature spoofing patch (based on $frameworks_base_patch) to frameworks/base"
 # Ensure patch has android:protectionLevel="signature|privileged" (Not "dangerous") https://developer.android.com/guide/topics/manifest/permission-element#plevel
@@ -75,10 +66,10 @@ git clean -q -f
 # PATCH AVB
 # https://xdaforums.com/t/guide-re-locking-the-bootloader-on-the-google-pixel-6-with-a-self-signed-build-of-los-20-0.4555419/
 # https://android.googlesource.com/platform/external/avb/+/master/README.md#build-system-integration
-cd "$SRC_DIR/android/lineageos/build/core"
+cd $SRC_DIR/build/core
 patch --quiet --force -p1 -i $INIT_DIR/patches/core_Makefile-21.0
 
-cd "$SRC_DIR/android/lineageos/device/google/sunfish"
+cd $SRC_DIR/device/google/sunfish
 # https://github.com/LineageOS/android_device_google_sunfish/blob/lineage-21/BoardConfigLineage.mk
 sed -i "$ BOARD_AVB_ALGORITHM := SHA256_RSA4096" BoardConfigLineage.mk
 sed -i "$ BOARD_AVB_KEY_PATH := $KEYS_DIR/releasekey.pem" BoardConfigLineage.mk
@@ -87,7 +78,7 @@ sed -i 's/^BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3/#BOARD_AVB_MAKE_VBMETA_
 sed -i "s/external\/avb\/test\/data\/testkey_rsa2048.pem/$KEYS_DIR\/releasekey.pem" BoardConfig-common.mk
 sed -i 's/SHA256_RSA2048/SHA256_RSA4096/' BoardConfig-common.mk
 
-cd "$SRC_DIR/android/lineageos/device/google/gs101"
+cd $SRC_DIR/device/google/gs101
 # https://github.com/LineageOS/android_device_google_gs101/blob/lineage-21/BoardConfigLineage.mk
 # sed -i "$ BOARD_AVB_ALGORITHM := SHA256_RSA4096" BoardConfigLineage.mk
 # sed -i "$ BOARD_AVB_KEY_PATH := $KEYS_DIR/releasekey.pem" BoardConfigLineage.mk
@@ -107,7 +98,6 @@ sed -i "1s;^;PRODUCT_DEFAULT_DEV_CERTIFICATE := user-keys/releasekey\nPRODUCT_OT
 
 # https://wiki.lineageos.org/devices/sunfish/build/#prepare-the-device-specific-code
 echo ">> [$(date)] Preparing build environment"
-set +eu
 source build/envsetup.sh > /dev/null
 breakfast "$DEVICE" "$BUILD_TYPE" &>> "$DEBUG_LOG"
 breakfast_returncode=$?
@@ -115,4 +105,3 @@ if [ $breakfast_returncode -ne 0 ]; then
     echo ">> [$(date)] breakfast failed for $DEVICE, $BRANCH_NAME branch" | tee -a "$DEBUG_LOG"
     continue
 fi
-set -eu
