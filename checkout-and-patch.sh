@@ -6,7 +6,7 @@ set -eEuo pipefail
 cd "$SRC_DIR"
 # Remove previous changes (if they exist)
 echo ">> [$(date)] Remove previous changes (if they exist)" | tee -a "$REPO_LOG"
-for path in "vendor/lineage" "frameworks/base" "build/core" "device/google/sunfish" "device/google/gs101"; do
+for path in "vendor/lineage" "frameworks/base" "build/make" "device/google/sunfish" "device/google/gs101"; do
     if [ -d "$path" ]; then
     cd "$path"
     git reset -q --hard
