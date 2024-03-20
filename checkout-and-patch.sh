@@ -17,7 +17,7 @@ done
 
 
 echo ">> [$(date)] (Re)initializing branch repository" | tee -a "$REPO_LOG"
-repo init -u https://github.com/LineageOS/android.git -b "$BRANCH_NAME" --git-lfs --depth=1 &>> "$REPO_LOG"
+repo init -u https://github.com/LineageOS/android.git -b "$BRANCH_NAME" --git-lfs --depth=1 | tee -a "$REPO_LOG"
 
 # lineageos4microg
 vendor=lineage
@@ -34,7 +34,7 @@ rsync -a --delete --include '*.xml' --exclude '*' "$LMANIFEST_DIR/" .repo/local_
 # https://wiki.lineageos.org/devices/sunfish/build/#download-the-source-code
 echo ">> [$(date)] Syncing branch repository" | tee -a "$REPO_LOG"
 builddate=$(date +%Y%m%d)
-repo sync --jobs 6 --retry-fetches 2 -c --force-sync &>> "$REPO_LOG"
+repo sync --jobs 6 --retry-fetches 2 -c --force-sync | tee -a "$REPO_LOG"
 
 if [ ! -d "vendor/$vendor" ]; then
     echo ">> [$(date)] Missing \"vendor/$vendor\", aborting"
@@ -86,7 +86,7 @@ sed -i "1s;^;PRODUCT_DEFAULT_DEV_CERTIFICATE := user-keys/releasekey\nPRODUCT_OT
 echo ">> [$(date)] breakfast preparing build environment"
 set +eu
 source build/envsetup.sh > /dev/null
-breakfast "$DEVICE" "$BUILD_TYPE" &>> "$DEBUG_LOG"
+breakfast "$DEVICE" "$BUILD_TYPE" | tee -a "$DEBUG_LOG"
 breakfast_returncode=$?
 if [ $breakfast_returncode -ne 0 ]; then
     echo ">> [$(date)] breakfast failed for $DEVICE, $BRANCH_NAME branch" | tee -a "$DEBUG_LOG"
@@ -101,22 +101,25 @@ echo ">> [$(date)] patch core_Makefile"
 cd $SRC_DIR/build/make
 patch --quiet --force -p1 -i $INIT_DIR/patches/core_Makefile-21.0.patch
 
+echo ">> [$(date)] patch device/google/sunfish"
 cd $SRC_DIR/device/google/sunfish
 # https://github.com/LineageOS/android_device_google_sunfish/blob/lineage-21/BoardConfigLineage.mk
-sed -i "$ BOARD_AVB_ALGORITHM := SHA256_RSA4096" BoardConfigLineage.mk
-sed -i "$ BOARD_AVB_KEY_PATH := $KEYS_DIR/releasekey.pem" BoardConfigLineage.mk
+sed -i "$ a BOARD_AVB_ALGORITHM := SHA256_RSA4096" BoardConfigLineage.mk
+sed -i "$ a BOARD_AVB_KEY_PATH := $KEYS_DIR/releasekey.pem" BoardConfigLineage.mk
 sed -i 's/^BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3/#BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3/' BoardConfigLineage.mk
 # https://github.com/LineageOS/android_device_google_sunfish/blob/lineage-21/BoardConfig-common.mk
-sed -i "s/external\/avb\/test\/data\/testkey_rsa2048.pem/$KEYS_DIR\/releasekey.pem" BoardConfig-common.mk
+sed -i "s/external\/avb\/test\/data\/testkey_rsa2048.pem/$KEYS_DIR\/releasekey.pem/" BoardConfig-common.mk
 sed -i 's/SHA256_RSA2048/SHA256_RSA4096/' BoardConfig-common.mk
 
-cd $SRC_DIR/device/google/gs101
+#for pixel 6+ gs101 == tensor chip
+# echo ">> [$(date)] patch device/google/gs101"
+# cd $SRC_DIR/device/google/gs101
 # https://github.com/LineageOS/android_device_google_gs101/blob/lineage-21/BoardConfigLineage.mk
-# sed -i "$ BOARD_AVB_ALGORITHM := SHA256_RSA4096" BoardConfigLineage.mk
-# sed -i "$ BOARD_AVB_KEY_PATH := $KEYS_DIR/releasekey.pem" BoardConfigLineage.mk
-sed -i 's/^BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3/#BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3/' BoardConfigLineage.mk
+# sed -i "$ a BOARD_AVB_ALGORITHM := SHA256_RSA4096" BoardConfigLineage.mk
+# sed -i "$ a BOARD_AVB_KEY_PATH := $KEYS_DIR/releasekey.pem" BoardConfigLineage.mk
+# sed -i 's/^BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3/#BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3/' BoardConfigLineage.mk
 # https://github.com/LineageOS/android_device_google_gs101/blob/lineage-21/BoardConfig-common.mk
-sed -i "s/external\/avb\/test\/data\/testkey_rsa2048.pem/$KEYS_DIR\/releasekey.pem" BoardConfig-common.mk
-sed -i 's/SHA256_RSA2048/SHA256_RSA4096/' BoardConfig-common.mk
+# sed -i "s/external\/avb\/test\/data\/testkey_rsa2048.pem/$KEYS_DIR\/releasekey.pem/" BoardConfig-common.mk
+# sed -i 's/SHA256_RSA2048/SHA256_RSA4096/' BoardConfig-common.mk
 
 cd "$SRC_DIR"

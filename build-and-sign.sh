@@ -7,7 +7,7 @@ cd "$SRC_DIR"
 # https://wiki.lineageos.org/signing_builds#generating-and-signing-target-files
 # https://wiki.lineageos.org/devices/sunfish/build/#start-the-build
 echo ">> [$(date)] Starting build target-files-package otatools" | tee -a "$DEBUG_LOG"
-mka target-files-package otatools &>> "$DEBUG_LOG"
+mka target-files-package otatools | tee -a "$DEBUG_LOG"
 
 
 #   $OUT set by Lineage build?
@@ -118,9 +118,9 @@ sign_target_files_apks -o -d $KEYS_DIR \
 ota_from_target_files -k $KEYS_DIR/releasekey \
 --block --backup=true \
 signed-target_files.zip \
-signed-ota_update.zip &>> "$DEBUG_LOG"
+signed-ota_update.zip | tee -a "$DEBUG_LOG"
 
 
 
-"$SRC_DIR/external/avb/avbtool" extract_public_key --key "$KEYS_DIR/releasekey.pem --output "$KEYS_DIR/avb_pkmd.bin &>> "$DEBUG_LOG"
+"$SRC_DIR/external/avb/avbtool" extract_public_key --key "$KEYS_DIR/releasekey.pem --output "$KEYS_DIR/avb_pkmd.bin | tee -a "$DEBUG_LOG"
 

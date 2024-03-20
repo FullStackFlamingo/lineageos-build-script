@@ -13,6 +13,12 @@ for c in releasekey platform shared media networkstack sdk_sandbox bluetooth; do
   fi
 done
 
+# releasekey.pem for AVB
+if [ ! -f "$KEYS_DIR/releasekey.pem" ]; then
+  echo ">> [$(date)]  Generating releasekey.pem for AVB"
+  openssl pkcs8 -in releasekey.pk8 -inform DER -out releasekey.pem -nocrypt
+fi
+
 # symlink cyngn-app testkey
 for c in cyngn{-priv,}-app testkey; do
   for e in pk8 x509.pem; do
