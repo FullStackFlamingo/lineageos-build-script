@@ -33,7 +33,6 @@ rsync -a --delete --include '*.xml' --exclude '*' "$LMANIFEST_DIR/" .repo/local_
 
 # https://wiki.lineageos.org/devices/sunfish/build/#download-the-source-code
 echo ">> [$(date)] Syncing branch repository" | tee -a "$REPO_LOG"
-builddate=$(date +%Y%m%d)
 repo sync --jobs $(nproc --all) --retry-fetches 2 -c --force-sync | tee -a "$REPO_LOG"
 
 if [ ! -d "vendor/$vendor" ]; then

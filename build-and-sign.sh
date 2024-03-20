@@ -114,11 +114,13 @@ mka target-files-package otatools | tee -a "$DEBUG_LOG"
     $OUT/obj/PACKAGING/target_files_intermediates/*-target_files-*.zip \
     signed-target_files.zip
 
+builddate=$(date +%Y%m%d)
+
 # https://wiki.lineageos.org/signing_builds#generating-the-install-package
 ./build/tools/releasetools/ota_from_target_files -k $KEYS_DIR/releasekey \
 --block --backup=true \
 signed-target_files.zip \
-signed-ota_update.zip | tee -a "$DEBUG_LOG"
+signed-ota_update-lineageos-$builddate.zip | tee -a "$DEBUG_LOG"
 
 
 
