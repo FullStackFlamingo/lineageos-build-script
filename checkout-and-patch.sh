@@ -84,14 +84,15 @@ sed -i "1s;^;PRODUCT_DEFAULT_DEV_CERTIFICATE := user-keys/releasekey\nPRODUCT_OT
 
 # https://wiki.lineageos.org/devices/sunfish/build/#prepare-the-device-specific-code
 echo ">> [$(date)] breakfast preparing build environment"
+set +eu
 source build/envsetup.sh > /dev/null
 breakfast "$DEVICE" "$BUILD_TYPE" &>> "$DEBUG_LOG"
 breakfast_returncode=$?
 if [ $breakfast_returncode -ne 0 ]; then
     echo ">> [$(date)] breakfast failed for $DEVICE, $BRANCH_NAME branch" | tee -a "$DEBUG_LOG"
-    continue
+    exit 1
 fi
-
+set -eu
 
 # PATCH AVB
 # https://xdaforums.com/t/guide-re-locking-the-bootloader-on-the-google-pixel-6-with-a-self-signed-build-of-los-20-0.4555419/
