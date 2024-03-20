@@ -27,7 +27,7 @@ mkdir -p .repo/local_manifests
 rsync -a --delete --include '*.xml' --exclude '*' "$LMANIFEST_DIR/" .repo/local_manifests/
 
 # ALTERNATIVE TO  https://wiki.lineageos.org/devices/sunfish/build/#extract-proprietary-blobs
-# add muppets.xml manifest to $LMANIFEST_DIR
+# add muppets-cherrypicked.xml manifest to $LMANIFEST_DIR
 # rm -f .repo/local_manifests/proprietary.xml
 # wget -q -O .repo/local_manifests/proprietary.xml "https://raw.githubusercontent.com/TheMuppets/manifests/$THEMUPPETS_BRANCH_NAME/muppets.xml"
 
