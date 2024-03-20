@@ -6,7 +6,7 @@ set -eEuo pipefail
 cd "$SRC_DIR"
 # Remove previous changes (if they exist)
 echo ">> [$(date)] Remove previous changes (if they exist)" | tee -a "$REPO_LOG"
-repo forall -v -c 'git reset -q --hard ; git clean -q -fd'
+repo forall -v -c 'git reset -q --hard ; git clean -q -fd' &>> "$REPO_LOG"
 
 echo ">> [$(date)] (Re)initializing branch repository" | tee -a "$REPO_LOG"
 repo init -u https://github.com/LineageOS/android.git -b "$BRANCH_NAME" --git-lfs --depth=1 &>> "$REPO_LOG"
