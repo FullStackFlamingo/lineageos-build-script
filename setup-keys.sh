@@ -16,8 +16,10 @@ done
 # releasekey.pem for AVB
 if [ ! -f "$KEYS_DIR/releasekey.pem" ]; then
   echo ">> [$(date)]  Generating releasekey.pem for AVB"
-  openssl pkcs8 -in releasekey.pk8 -inform DER -out releasekey.pem -nocrypt
-fi
+  openssl pkcs8 -in "$KEYS_DIR/releasekey.pk8" -inform DER -out "$KEYS_DIR/releasekey.pem" -nocrypt
+  else
+    echo ">> [$(date)] releasekey.pem for AVB already exists..."
+  fi
 
 # symlink cyngn-app testkey
 for c in cyngn{-priv,}-app testkey; do
