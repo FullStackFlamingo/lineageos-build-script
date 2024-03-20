@@ -101,6 +101,7 @@ echo ">> [$(date)] patch core_Makefile"
 cd $SRC_DIR/build/make
 patch --quiet --force -p1 -i $INIT_DIR/patches/core_Makefile-21.0.patch
 
+ESCAPED_RELEASE_KEY_PATH=$(printf '%s\n' "$KEYS_DIR/releasekey.pem" | sed -e 's/[\/&]/\\&/g')
 echo ">> [$(date)] patch device/google/sunfish"
 cd $SRC_DIR/device/google/sunfish
 # https://github.com/LineageOS/android_device_google_sunfish/blob/lineage-21/BoardConfigLineage.mk
@@ -108,7 +109,7 @@ sed -i "$ a BOARD_AVB_ALGORITHM := SHA256_RSA4096" BoardConfigLineage.mk
 sed -i "$ a BOARD_AVB_KEY_PATH := $KEYS_DIR/releasekey.pem" BoardConfigLineage.mk
 sed -i 's/^BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3/#BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3/' BoardConfigLineage.mk
 # https://github.com/LineageOS/android_device_google_sunfish/blob/lineage-21/BoardConfig-common.mk
-sed -i "s/external\/avb\/test\/data\/testkey_rsa2048.pem/$KEYS_DIR\/releasekey.pem/" BoardConfig-common.mk
+sed -i "s/external\/avb\/test\/data\/testkey_rsa2048.pem/$ESCAPED_RELEASE_KEY_PATH/" BoardConfig-common.mk
 sed -i 's/SHA256_RSA2048/SHA256_RSA4096/' BoardConfig-common.mk
 
 #for pixel 6+ gs101 == tensor chip
@@ -119,7 +120,7 @@ sed -i 's/SHA256_RSA2048/SHA256_RSA4096/' BoardConfig-common.mk
 # sed -i "$ a BOARD_AVB_KEY_PATH := $KEYS_DIR/releasekey.pem" BoardConfigLineage.mk
 # sed -i 's/^BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3/#BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3/' BoardConfigLineage.mk
 # https://github.com/LineageOS/android_device_google_gs101/blob/lineage-21/BoardConfig-common.mk
-# sed -i "s/external\/avb\/test\/data\/testkey_rsa2048.pem/$KEYS_DIR\/releasekey.pem/" BoardConfig-common.mk
+# sed -i "s/external\/avb\/test\/data\/testkey_rsa2048.pem/$ESCAPED_REPLACE/" BoardConfig-common.mk
 # sed -i 's/SHA256_RSA2048/SHA256_RSA4096/' BoardConfig-common.mk
 
 cd "$SRC_DIR"
