@@ -10,11 +10,11 @@ echo ">> [$(date)] Starting build target-files-package otatools" | tee -a "$DEBU
 mka target-files-package otatools | tee -a "$DEBUG_LOG"
 
 
-#   $OUT set by Lineage build?
+#   $OUT set by build/envsetup.sh?
 
 # https://wiki.lineageos.org/signing_builds#generating-and-signing-target-files
 # croot
-sign_target_files_apks -o -d $KEYS_DIR \
+./build/tools/releasetools/sign_target_files_apks -o -d $KEYS_DIR \
     --extra_apks com.android.adbd.apex=$KEYS_DIR/com.android.adbd \
     --extra_apks com.android.adservices.apex=$KEYS_DIR/com.android.adservices \
     --extra_apks com.android.adservices.api.apex=$KEYS_DIR/com.android.adservices.api \
@@ -115,7 +115,7 @@ sign_target_files_apks -o -d $KEYS_DIR \
     signed-target_files.zip
 
 # https://wiki.lineageos.org/signing_builds#generating-the-install-package
-ota_from_target_files -k $KEYS_DIR/releasekey \
+./build/tools/releasetools/ota_from_target_files -k $KEYS_DIR/releasekey \
 --block --backup=true \
 signed-target_files.zip \
 signed-ota_update.zip | tee -a "$DEBUG_LOG"

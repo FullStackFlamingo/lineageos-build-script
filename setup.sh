@@ -48,7 +48,7 @@ ccache -o compression=true
 # https://wiki.lineageos.org/devices/sunfish/build/#create-the-directories
 mkdir -p $SRC_DIR $CCACHE_DIR $ZIP_DIR $LMANIFEST_DIR $KEYS_DIR $LOGS_DIR
 
-$INIT_DIR/setup-keys.sh
+source $INIT_DIR/setup-keys.sh
 
 # https://wiki.lineageos.org/devices/sunfish/build/#install-the-repo-command
 curl https://storage.googleapis.com/git-repo-downloads/repo > /usr/local/bin/repo && \
@@ -59,6 +59,6 @@ git config --global user.email "you@example.com"
 git config --global user.name "Your Name"
 git config --global trailer.changeid.key "Change-Id"
 
-$INIT_DIR/checkout-and-patch.sh
+source $INIT_DIR/checkout-and-patch.sh
 
-$INIT_DIR/build-and-sign.sh
+source $INIT_DIR/build-and-sign.sh
