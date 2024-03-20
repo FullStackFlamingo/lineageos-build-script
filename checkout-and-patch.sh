@@ -39,6 +39,14 @@ if [ ! -d "vendor/$vendor" ]; then
     exit 1
 fi
 
+# figure out Lineage version to name output file
+makefile_containing_version="vendor/$vendor/config/common.mk"
+if [ -f "vendor/$vendor/config/version.mk" ]; then
+    makefile_containing_version="vendor/$vendor/config/version.mk"
+fi
+los_ver_major=$(sed -n -e 's/^\s*PRODUCT_VERSION_MAJOR = //p' "$makefile_containing_version")
+los_ver_minor=$(sed -n -e 's/^\s*PRODUCT_VERSION_MINOR = //p' "$makefile_containing_version")
+los_ver="$los_ver_major.$los_ver_minor"
 
 echo ">> [$(date)] Setting \"$RELEASE_TYPE\" as release type"
 sed -i "/\$(filter .*\$(${vendor^^}_BUILDTYPE)/,/endif/d" "$makefile_containing_version"
