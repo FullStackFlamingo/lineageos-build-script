@@ -118,9 +118,9 @@ sign_target_files_apks -o -d $KEYS_DIR \
 ota_from_target_files -k $KEYS_DIR/releasekey \
 --block --backup=true \
 signed-target_files.zip \
-signed-ota_update.zip
+signed-ota_update.zip &>> "$DEBUG_LOG"
 
 
 
-"$SRC_DIR/external/avb/avbtool" extract_public_key --key "$KEYS_DIR/releasekey.pem --output "$KEYS_DIR/avb_pkmd.bin
+"$SRC_DIR/external/avb/avbtool" extract_public_key --key "$KEYS_DIR/releasekey.pem --output "$KEYS_DIR/avb_pkmd.bin &>> "$DEBUG_LOG"
 

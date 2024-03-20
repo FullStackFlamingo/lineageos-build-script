@@ -4,16 +4,9 @@ set -eEuo pipefail
 
 # https://wiki.lineageos.org/devices/sunfish/build/#initialize-the-lineageos-source-repository
 cd "$SRC_DIR"
-# Remove previous changes of vendor/cm, vendor/lineage and frameworks/base (if they exist)
-echo ">> [$(date)]  Remove previous changes of vendor/cm, vendor/lineage and frameworks/base (if they exist)" | tee -a "$REPO_LOG"
-for path in "vendor/cm" "vendor/lineage" "frameworks/base" "packages/apps/PermissionController" "packages/modules/Permission"; do
-    if [ -d "$path" ]; then
-    cd "$path"
-    git reset -q --hard
-    git clean -q -fd
-    cd $SRC_DIR
-    fi
-done
+# Remove previous changes (if they exist)
+echo ">> [$(date)] Remove previous changes (if they exist)" | tee -a "$REPO_LOG"
+repo forall -v -c 'git reset -q --hard ; git clean -q -fd'
 
 echo ">> [$(date)] (Re)initializing branch repository" | tee -a "$REPO_LOG"
 repo init -u https://github.com/LineageOS/android.git -b "$BRANCH_NAME" --git-lfs --depth=1 &>> "$REPO_LOG"
